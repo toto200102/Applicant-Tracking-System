@@ -46,8 +46,8 @@ cd Applicant-Tracking-System
 ```bash
 cd backend
 npm install
-cp env.txt .env
-# Edit .env with your MongoDB URI and JWT secret
+cp .env.example .env
+# Edit .env with your MongoDB URI and JWT secret if you want to override the defaults
 npm run dev
 ```
 
@@ -56,8 +56,10 @@ npm run dev
 ```bash
 cd ../atsdu
 npm install
-cp env.txt .env.local
-# Edit .env.local with your API URL
+cat > .env.local <<'EOF'
+NEXT_PUBLIC_API_URL=http://localhost:5020/api
+NEXT_PUBLIC_BACKEND_URL=http://localhost:5020
+EOF
 npm run dev
 ```
 
@@ -65,6 +67,41 @@ npm run dev
 
 - Frontend: http://localhost:3000
 - Backend API: http://localhost:5000
+
+## 👀 Local Preview (fast path)
+
+Use this flow to spin up the stack for a quick local preview:
+
+1. **Start MongoDB (Docker):**
+
+   ```bash
+   docker run -d --name atsdu-mongo -p 27017:27017 mongo:7
+   ```
+
+2. **Backend:**
+
+   ```bash
+   cd backend
+   cp .env.example .env
+   npm install
+   npm run dev
+   ```
+
+   The backend defaults to `mongodb://127.0.0.1:27017/atsdu` when `MONGO_URI` is not set, so the Docker container above works out of the box.
+
+3. **Frontend:**
+
+   ```bash
+   cd atsdu
+   npm install
+   cat > .env.local <<'EOF'
+   NEXT_PUBLIC_API_URL=http://localhost:5020/api
+   NEXT_PUBLIC_BACKEND_URL=http://localhost:5020
+   EOF
+   npm run dev -- --hostname 0.0.0.0 --port 3000
+   ```
+
+4. **Preview:** Open http://localhost:3000 to browse the app. The frontend is preconfigured to talk to the backend on port 5020.
 
 ## 🏗️ Architecture Overview
 
@@ -115,7 +152,7 @@ Create a `.env` file in the `backend/` directory:
 
 ```bash
 cd backend
-cp env.txt .env
+cp .env.example .env
 ```
 
 Edit `.env` with your configuration:

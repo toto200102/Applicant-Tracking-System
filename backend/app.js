@@ -5,7 +5,7 @@ const dotenv = require("dotenv");
 const cors = require("cors");
 const http = require("http");
 const { Server } = require("socket.io");
-const connectDB = require("./config/db");
+const { connectDB, stopMemoryServer } = require("./config/db");
 const errorHandler = require("./middleware/error"); // The new middleware
 const { setupSocketHandlers } = require("./socket/socketHandler");
 
@@ -81,5 +81,14 @@ server.listen(
 process.on("unhandledRejection", (err, promise) => {
   console.error(`Error: ${err.message}`);
   // Close server & exit process
-  server.close(() => process.exit(1));
+  server.close(async () => {
+    await stopMemoryServer();
+    process.exit(1);
+  });
+});
+
+// Gracefully shut down the in-memory MongoDB instance on interrupt
+process.on("SIGINT", async () => {
+  await stopMemoryServer();
+  process.exit(0);
 });
